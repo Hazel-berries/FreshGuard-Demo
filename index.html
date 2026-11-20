@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FreshGuard Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: a single column that reads top to bottom, like walking the aisle: shelves first, then tonight's prediction. */
+:root {
+  --bg: #f4f6f5;
+  --surface: #ffffff;
+  --ink: #17231f;
+  --muted: #5d6b66;
+  --line: #dde3e0;
+  --accent: #0f6b5c;
+  --accent-ink: #ffffff;
+  --shelf: #c9d2ce;
+  --item: #e8eeeb;
+  --item-edge: #b9c5c0;
+  --hi: #c2410c;
+  --hi-soft: #fde9dd;
+  --mid: #a16207;
+  --mid-soft: #fbf1d5;
+  --lo: #15803d;
+  --lo-soft: #e1f3e6;
+  --e0: #dc5a2a;
+  --e1: #e8a33d;
+  --e2: #9cc36b;
+  --e3: #4f9d7a;
+  --e4: #2f6f8f;
+  --font-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111816; --surface: #19221f; --ink: #e6ece9; --muted: #9aa8a2; --line: #2b3632;
+    --accent: #3fb59c; --accent-ink: #0b1513; --shelf: #3a4743; --item: #26312d; --item-edge: #46534e;
+    --hi: #f08a5d; --hi-soft: #3a2219; --mid: #e3b552; --mid-soft: #33290f; --lo: #6fcf8c; --lo-soft: #16301f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111816; --surface: #19221f; --ink: #e6ece9; --muted: #9aa8a2; --line: #2b3632;
+  --accent: #3fb59c; --accent-ink: #0b1513; --shelf: #3a4743; --item: #26312d; --item-edge: #46534e;
+  --hi: #f08a5d; --hi-soft: #3a2219; --mid: #e3b552; --mid-soft: #33290f; --lo: #6fcf8c; --lo-soft: #16301f;
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+}
+.wrap {
+  max-width: 1080px; margin: 0 auto;
+  padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 28px;
+}
+h1, h2, h3 { font-family: var(--font-display); margin: 0; text-wrap: balance; }
+h1 { font-size: 30px; letter-spacing: -0.01em; }
+h2 { font-size: 21px; }
+h3 { font-size: 16px; }
+.lede { color: var(--muted); max-width: 68ch; margin: 6px 0 0; }
+.step { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.sec-head { display: flex; flex-direction: column; gap: 4px; }
+.note { font-size: 13px; color: var(--muted); }
+
+/* Shelves */
+.shelves { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0;
+}
+.card-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.sku { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rack { display: flex; gap: 10px; align-items: flex-end; padding: 10px 10px 0; border-bottom: 4px solid var(--shelf); min-height: 96px; overflow-x: auto; }
+.col { display: flex; flex-direction: column-reverse; align-items: center; gap: 3px; }
+.col-items { display: flex; flex-direction: column-reverse; gap: 3px; }
+.unit { width: 26px; height: 9px; border-radius: 2px; background: var(--item); border: 1px solid var(--item-edge); }
+.col-lbl { font-size: 11px; color: var(--muted); padding-top: 4px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.facts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.fact { background: var(--bg); border-radius: 8px; padding: 8px 10px; }
+.fact-lbl { font-size: 12px; color: var(--muted); }
+.fact-val { font-family: var(--font-display); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.stepper { display: flex; align-items: center; gap: 6px; }
+.stepper button {
+  width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink); cursor: pointer; font-size: 15px; line-height: 1;
+}
+.stepper button:hover { border-color: var(--accent); color: var(--accent); }
+.mix-lbl { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.mixbar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--item); }
+.mixbar span { display: block; height: 100%; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.legend i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+
+/* Run */
+.run-bar {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  padding: 14px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px;
+  box-shadow: 0 6px 20px rgba(15, 40, 33, 0.08);
+}
+.btn-run {
+  background: var(--accent); color: var(--accent-ink); border: none; border-radius: 8px;
+  padding: 11px 20px; font: 600 15px var(--font-body); cursor: pointer;
+}
+.btn-run:disabled { opacity: 0.6; cursor: progress; }
+.progress { flex: 1; min-width: 180px; display: flex; flex-direction: column; gap: 4px; }
+.track { height: 6px; background: var(--item); border-radius: 3px; overflow: hidden; }
+.fill { height: 100%; width: 0; background: var(--accent); transition: width 120ms linear; }
+.prog-txt { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* Results */
+.summary { display: flex; flex-wrap: wrap; gap: 10px; }
+.pill { border-radius: 999px; padding: 4px 12px; font-size: 13px; font-weight: 600; }
+.pill.hi { background: var(--hi-soft); color: var(--hi); }
+.pill.mid { background: var(--mid-soft); color: var(--mid); }
+.pill.lo { background: var(--lo-soft); color: var(--lo); }
+.results { display: flex; flex-direction: column; gap: 10px; }
+.res {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  padding: 14px 16px; display: grid; gap: 10px 20px;
+  grid-template-columns: minmax(150px, 1.1fr) minmax(170px, 1fr) minmax(220px, 1.4fr);
+  align-items: center; border-left: 5px solid var(--line);
+}
+.res.hi { border-left-color: var(--hi); }
+.res.mid { border-left-color: var(--mid); }
+.res.lo { border-left-color: var(--lo); }
+.res > * { min-width: 0; }
+.risk-num { font-family: var(--font-display); font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.res.hi .risk-num { color: var(--hi); }
+.res.mid .risk-num { color: var(--mid); }
+.res.lo .risk-num { color: var(--lo); }
+.risk-lbl { font-size: 12px; color: var(--muted); }
+.action { display: inline-block; margin-top: 4px; font-size: 13px; font-weight: 600; }
+.res.hi .action { color: var(--hi); }
+.res.mid .action { color: var(--mid); }
+.res.lo .action { color: var(--lo); }
+.left-lbl { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+.placeholder {
+  border: 1px dashed var(--line); border-radius: 10px; padding: 26px; text-align: center; color: var(--muted);
+}
+details { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; }
+summary { cursor: pointer; font-weight: 600; }
+details p { color: var(--muted); max-width: 72ch; margin: 8px 0 0; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 720px) {
+  .res { grid-template-columns: 1fr; }
+  h1 { font-size: 25px; }
+}
+@media (prefers-reduced-motion: reduce) { .fill { transition: none; } }
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header>
+    <h1>FreshGuard</h1>
+    <p class="lede">A prototype of FreshGuard's expiration predictor. It looks at a small store's shelves and predicts which products will have food expire unsold tonight, so staff can pull it for donation in time. The store below is a synthetic example, and everything runs in your browser.</p>
+  </header>
+
+  <section class="sec-head" aria-labelledby="h-shelves">
+    <span class="step">Step 1</span>
+    <h2 id="h-shelves">This morning's shelves</h2>
+    <p class="lede">Each shelf shows its columns of items, front at the bottom. Staff only count how many items are left at closing. Change any closing count to see how the prediction changes.</p>
+  </section>
+  <div class="shelves" id="shelves"></div>
+
+  <div class="run-bar">
+    <button class="btn-run" id="run">Predict tonight's leftovers</button>
+    <div class="progress">
+      <div class="track"><div class="fill" id="fill"></div></div>
+      <div class="prog-txt" id="prog">Ready to simulate 15,000 shopping days per product.</div>
+    </div>
+  </div>
+
+  <section class="sec-head" aria-labelledby="h-results">
+    <span class="step">Step 2</span>
+    <h2 id="h-results">Tonight's prediction</h2>
+    <p class="lede">Risk is the chance that at least one item expiring today is still on the shelf at closing. Products are sorted from highest risk.</p>
+  </section>
+  <div id="summary" class="summary"></div>
+  <div class="results" id="results"><div class="placeholder">Press "Predict tonight's leftovers" to see which products need attention.</div></div>
+
+  <details>
+    <summary>How the prediction works</summary>
+    <p>A small store knows how many items were on each shelf in the morning and how many are left at closing, but not which ones. FreshGuard fills that gap by simulating many possible days. In each simulated day, shoppers usually take from the front of a column, sometimes reach behind, and staff occasionally restock and reshuffle. Days that end with the observed closing count are kept, and the leftover items are tallied by expiry date. The donation tracker and pickup planner, which use these predictions, are in development.</p>
+  </details>
+</div>
+
+<script type="module">
+import { runMCSimulationAggregate, normalizeDistroFromJSON, sampleLayout } from './engine.js';
+
+const EXP_COLORS = ['var(--e0)', 'var(--e1)', 'var(--e2)', 'var(--e3)', 'var(--e4)'];
+const expLabel = d => d === 0 ? 'today' : d === 1 ? 'tomorrow' : `in ${d} days`;
+let store = null;
+let running = false;
+
+const fmt1 = x => (Math.round(x * 10) / 10).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+function colorFor(e) { const d = e.expiry; return EXP_COLORS[d <= 0 ? 0 : d === 1 ? 1 : d <= 3 ? 2 : d <= 7 ? 3 : 4]; }
+
+function mixBar(entries, total) {
+  // entries: [{expiry, value}] ; total: sum
+  const segs = entries.map((e, i) => total > 0
+    ? `<span style="width:${(100 * e.value / total).toFixed(2)}%;background:${colorFor(e)}" title="${fmt1(e.value)} ${expLabel(e.expiry)}"></span>` : '').join('');
+  const leg = entries.map((e, i) =>
+    `<span><i style="background:${colorFor(e)}"></i>${fmt1(e.value)} ${expLabel(e.expiry)}</span>`).join('');
+  return `<div class="mixbar" role="img" aria-label="Expiry mix">${segs}</div><div class="legend">${leg}</div>`;
+}
+
+function renderShelves() {
+  const el = document.getElementById('shelves');
+  el.innerHTML = store.products.map((p, idx) => {
+    const n = p.columns.reduce((a, b) => a + b, 0);
+    const cols = p.columns.map((c, i) => `
+      <div class="col">
+        <div class="col-lbl">Col ${i + 1} · ${c}</div>
+        <div class="col-items">${'<div class="unit"></div>'.repeat(c)}</div>
+      </div>`).join('');
+    const dist = normalizeDistroFromJSON(p.distribution).sort((a, b) => a.expiry - b.expiry);
+    const mix = dist.map(d => ({ expiry: d.expiry, value: d.prob * n }));
+    return `
+    <article class="card">
+      <div class="card-top"><h3>${p.name}</h3><span class="sku">${n} items</span></div>
+      <div class="rack" aria-label="${p.columns.length} columns">${cols}</div>
+      <div class="facts">
+        <div class="fact"><div class="fact-lbl">On shelf this morning</div><div class="fact-val">${n}</div></div>
+        <div class="fact"><div class="fact-lbl">Left at closing</div>
+          <div class="stepper">
+            <button type="button" data-i="${idx}" data-d="-1" aria-label="Fewer left">−</button>
+            <span class="fact-val" id="nend-${idx}">${p.n_end}</span>
+            <button type="button" data-i="${idx}" data-d="1" aria-label="More left">+</button>
+          </div>
+        </div>
+      </div>
+      <div><div class="mix-lbl">Expiry mix this morning (about how many items expire when)</div>${mixBar(mix, n)}</div>
+    </article>`;
+  }).join('');
+  el.querySelectorAll('.stepper button').forEach(b => b.onclick = () => {
+    if (running) return;
+    const p = store.products[+b.dataset.i];
+    const n = p.columns.reduce((a, c) => a + c, 0);
+    p.n_end = Math.max(0, Math.min(n - 1, p.n_end + (+b.dataset.d)));
+    document.getElementById(`nend-${b.dataset.i}`).textContent = p.n_end;
+    markStale();
+  });
+}
+
+function markStale() {
+  if (!document.querySelector('.res')) return;
+  document.getElementById('prog').textContent = 'Closing counts changed. Run the prediction again to update.';
+}
+
+function level(p) { const r = Math.round(p * 100); return r >= 30 ? 'hi' : r >= 10 ? 'mid' : 'lo'; }
+const ACTION = { hi: 'Pull for donation tonight', mid: 'Check this shelf', lo: 'No action needed' };
+
+function renderResults(rows) {
+  rows.sort((a, b) => b.risk - a.risk);
+  const counts = { hi: 0, mid: 0, lo: 0 };
+  rows.forEach(r => counts[level(r.risk)]++);
+  document.getElementById('summary').innerHTML =
+    `<span class="pill hi">${counts.hi} to pull for donation</span>` +
+    `<span class="pill mid">${counts.mid} to check</span>` +
+    `<span class="pill lo">${counts.lo} fine</span>`;
+  document.getElementById('results').innerHTML = rows.map(r => {
+    const lv = level(r.risk);
+    const left = r.left.map(e => ({ expiry: e.expiry, value: e.mean })).filter(e => e.value > 0.005);
+    const total = left.reduce((s, e) => s + e.value, 0);
+    return `
+    <article class="res ${lv}">
+      <div><h3>${r.name}</h3><div class="note">${r.nItems} this morning, ${r.nEnd} left at closing</div></div>
+      <div>
+        <div class="risk-num">${(r.risk * 100).toFixed(0)}%</div>
+        <div class="risk-lbl">risk of food expiring unsold today</div>
+        <span class="action">${ACTION[lv]}</span>
+      </div>
+      <div>
+        <div class="left-lbl">The ${r.nEnd} items left at closing, by expiry date (expected)</div>
+        ${mixBar(left, total)}
+      </div>
+    </article>`;
+  }).join('');
+}
+
+function run() {
+  if (running || !store) return;
+  running = true;
+  const btn = document.getElementById('run');
+  btn.disabled = true;
+  const fill = document.getElementById('fill');
+  const prog = document.getElementById('prog');
+  const mcts = store.mcts ?? {};
+  const nIter = mcts.n_iter ?? 15000, nMC = mcts.n_mc ?? 4000;
+  const products = store.products;
+  const total = products.length;
+  const share = new Array(total).fill(0);
+  const rows = [];
+  const t0 = performance.now();
+  const update = () => {
+    const pct = 100 * share.reduce((a, b) => a + b, 0) / total;
+    fill.style.width = pct.toFixed(1) + '%';
+    prog.textContent = `Simulating shopping days… ${pct.toFixed(0)}%`;
+  };
+  document.getElementById('results').innerHTML = '<div class="placeholder">Simulating…</div>';
+  document.getElementById('summary').innerHTML = '';
+
+  const CONC = Math.max(2, Math.min(8, navigator.hardwareConcurrency || 4));
+  const queue = products.map((p, i) => i);
+  let active = 0, done = 0;
+
+  const startNext = () => {
+    while (active < CONC && queue.length) {
+      const i = queue.shift();
+      const p = products[i];
+      const nItems = p.columns.reduce((a, b) => a + b, 0);
+      const distroNorm = normalizeDistroFromJSON(p.distribution);
+      const initialState = sampleLayout(nItems, p.columns.length, 'colwise', p.columns);
+      const params = { q: p.q, p_s: p.p_s, p_r: p.p_r, p_sell: p.p_sell, n_end: p.n_end };
+      const mctsOptions = {
+        cExplore: mcts.c_explore ?? 1.414, nRollouts: mcts.n_rollouts ?? 10,
+        maxChildren: mcts.max_children ?? 50000, eagerFraction: mcts.eager_fraction ?? 0.75,
+        maxNodes: mcts.max_nodes ?? 10000, seed: null,
+      };
+      const w = new Worker('./worker.js', { type: 'module' });
+      active++;
+      w.onmessage = ({ data }) => {
+        if (data.type === 'progress') { share[i] = 0.95 * data.done / data.total; update(); return; }
+        if (data.type !== 'done') return;
+        w.terminate(); active--;
+        const mc = runMCSimulationAggregate(data.survivorPosterior, nItems, distroNorm, nMC, 1.0);
+        const risk = Math.max(0, 1 - (mc.pmf.get(0) ?? 0));
+        const left = distroNorm.map(d => ({ expiry: d.expiry, mean: mc.remainStats[d.expiry]?.mean ?? 0 }))
+          .sort((a, b) => a.expiry - b.expiry);
+        rows.push({ name: p.name, nItems, nEnd: p.n_end, risk, left });
+        share[i] = 1; done++; update();
+        if (done === total) finish(); else startNext();
+      };
+      w.onerror = e => {
+        w.terminate(); active--; done++; share[i] = 1;
+        prog.textContent = `Could not simulate ${p.name}: ${e.message}`;
+        if (done === total) finish(); else startNext();
+      };
+      w.postMessage({ initialState, params, mctsOptions, nIter, survivorSampleCap: 10000 });
+    }
+  };
+  const finish = () => {
+    running = false; btn.disabled = false;
+    fill.style.width = '100%';
+    const sec = ((performance.now() - t0) / 1000).toFixed(0);
+    prog.textContent = `Done. Simulated ${nIter.toLocaleString()} shopping days for each of ${total} products in ${sec} s.`;
+    renderResults(rows);
+  };
+  startNext();
+}
+
+document.getElementById('run').onclick = run;
+
+(async () => {
+  try {
+    const res = await fetch('./sample_store.json');
+    store = await res.json();
+    renderShelves();
+    run();
+  } catch (err) {
+    document.getElementById('shelves').innerHTML =
+      `<div class="placeholder">Could not load the sample store (${err.message}). Reload the page to try again.</div>`;
+  }
+})();
+</script>
+
+</body>
+</html>

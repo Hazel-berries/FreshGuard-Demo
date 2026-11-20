@@ -1,0 +1,240 @@
+{
+  "date": "2026-02-18",
+  "comment": "Synthetic sample store for the FreshGuard demo. Each product lists its shelf columns, expiry mix, model parameters and end-of-day count.",
+  "mcts": {
+    "n_iter": 15000,
+    "n_mc": 4000,
+    "n_rollouts": 10,
+    "c_explore": 1.414,
+    "max_children": 50000,
+    "eager_fraction": 0.75,
+    "max_nodes": 10000
+  },
+  "products": [
+    {
+      "id": "deli-turkey",
+      "name": "Deli Turkey Slices",
+      "q": 0.93,
+      "p_s": 0.2,
+      "p_r": 0.3,
+      "p_sell": 0.98,
+      "n_end": 3,
+      "columns": [
+        4,
+        4
+      ],
+      "distribution": [
+        {
+          "expiry": 0,
+          "weight": 2
+        },
+        {
+          "expiry": 1,
+          "weight": 4
+        },
+        {
+          "expiry": 2,
+          "weight": 3
+        },
+        {
+          "expiry": 4,
+          "weight": 2
+        }
+      ]
+    },
+    {
+      "id": "yogurt-plain",
+      "name": "Plain Yogurt 6oz",
+      "q": 0.85,
+      "p_s": 0.3,
+      "p_r": 0.5,
+      "p_sell": 0.97,
+      "n_end": 8,
+      "columns": [
+        6,
+        6,
+        6
+      ],
+      "distribution": [
+        {
+          "expiry": 1,
+          "weight": 3
+        },
+        {
+          "expiry": 3,
+          "weight": 5
+        },
+        {
+          "expiry": 5,
+          "weight": 7
+        },
+        {
+          "expiry": 7,
+          "weight": 3
+        }
+      ]
+    },
+    {
+      "id": "cream-cheese",
+      "name": "Cream Cheese 8oz",
+      "q": 0.8,
+      "p_s": 0.35,
+      "p_r": 0.55,
+      "p_sell": 0.94,
+      "n_end": 8,
+      "columns": [
+        6,
+        6
+      ],
+      "distribution": [
+        {
+          "expiry": 3,
+          "weight": 2
+        },
+        {
+          "expiry": 7,
+          "weight": 5
+        },
+        {
+          "expiry": 10,
+          "weight": 6
+        },
+        {
+          "expiry": 14,
+          "weight": 4
+        }
+      ]
+    },
+    {
+      "id": "milk-whole",
+      "name": "Whole Milk 1gal",
+      "q": 0.9,
+      "p_s": 0.25,
+      "p_r": 0.4,
+      "p_sell": 0.99,
+      "n_end": 6,
+      "columns": [
+        8,
+        8,
+        8
+      ],
+      "distribution": [
+        {
+          "expiry": 0,
+          "weight": 2
+        },
+        {
+          "expiry": 1,
+          "weight": 4
+        },
+        {
+          "expiry": 2,
+          "weight": 6
+        },
+        {
+          "expiry": 3,
+          "weight": 6
+        },
+        {
+          "expiry": 7,
+          "weight": 6
+        }
+      ]
+    },
+    {
+      "id": "cheddar-sliced",
+      "name": "Cheddar Sliced 8oz",
+      "q": 0.82,
+      "p_s": 0.28,
+      "p_r": 0.42,
+      "p_sell": 0.95,
+      "n_end": 7,
+      "columns": [
+        5,
+        5,
+        5
+      ],
+      "distribution": [
+        {
+          "expiry": 5,
+          "weight": 2
+        },
+        {
+          "expiry": 10,
+          "weight": 5
+        },
+        {
+          "expiry": 15,
+          "weight": 6
+        },
+        {
+          "expiry": 20,
+          "weight": 3
+        }
+      ]
+    },
+    {
+      "id": "hummus",
+      "name": "Hummus Classic 10oz",
+      "q": 0.87,
+      "p_s": 0.25,
+      "p_r": 0.4,
+      "p_sell": 0.96,
+      "n_end": 5,
+      "columns": [
+        4,
+        4,
+        4
+      ],
+      "distribution": [
+        {
+          "expiry": 1,
+          "weight": 2
+        },
+        {
+          "expiry": 3,
+          "weight": 4
+        },
+        {
+          "expiry": 6,
+          "weight": 5
+        },
+        {
+          "expiry": 9,
+          "weight": 3
+        }
+      ]
+    },
+    {
+      "id": "bread-white",
+      "name": "White Bread Loaf",
+      "q": 0.92,
+      "p_s": 0.2,
+      "p_r": 0.35,
+      "p_sell": 0.98,
+      "n_end": 4,
+      "columns": [
+        5,
+        5
+      ],
+      "distribution": [
+        {
+          "expiry": 0,
+          "weight": 1
+        },
+        {
+          "expiry": 1,
+          "weight": 3
+        },
+        {
+          "expiry": 2,
+          "weight": 5
+        },
+        {
+          "expiry": 4,
+          "weight": 4
+        }
+      ]
+    }
+  ]
+}
